@@ -1,5 +1,7 @@
 # weibo_hot_search
 
+![[object Object]](https://socialify.git.ci/hellodk34/weibo_hot_search/image?font=Inter&forks=1&issues=1&language=1&name=1&owner=1&pattern=Floating%20Cogs&pulls=1&stargazers=1&theme=Light)
+
 本项目是 `微博热搜实时推送` 的后端程序，功能
 
 - 获取微博热搜内容定时推送到 tg 频道
