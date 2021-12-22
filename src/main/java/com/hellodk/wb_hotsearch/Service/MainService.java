@@ -143,7 +143,7 @@ public class MainService {
             return;
         }
         // 南京同城本地热搜 json array
-        NJ_HOT_SEARCH_LIST = jsonObject.getJSONObject("data").getJSONArray("cards").getJSONObject(0).getJSONArray("card_group");
+        NJ_HOT_SEARCH_LIST = jsonObject.getJSONObject("data").getJSONArray("cards").getJSONObject(1).getJSONArray("card_group");
     }
 
     /**

@@ -11,10 +11,10 @@
     <groupId>com.hellodk</groupId>
     <artifactId>wb_hotsearch</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <name>wb_hotsearch</name>
     <description>project for wb_hotsearch backend</description>
-<!--    <packaging>war</packaging>-->
+    <!--    <packaging>war</packaging>-->
     <properties>
         <java.version>1.8</java.version>
     </properties>
