@@ -3,6 +3,6 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://YOUR_IP:3306/wb_hotsearch?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
-    username: root
-    password: YOUR_ROOT_PASSWORD
+    url: jdbc:mysql://YOUR_DB_IP:3306/wb_hotsearch?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
+    username: DB_USERNAME
+    password: DB_PASSWORD

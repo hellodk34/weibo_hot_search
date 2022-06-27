@@ -11,6 +11,7 @@ import com.hellodk.wb_hotsearch.Bean.Post;
 import com.hellodk.wb_hotsearch.Bean.Result;
 import com.hellodk.wb_hotsearch.Mapper.PostMapper;
 import com.hellodk.wb_hotsearch.Util.NumbersDict;
+import com.hellodk.wb_hotsearch.Util.YourlsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -41,9 +42,17 @@ public class MainService {
 
     private static String urlString = "https://api.telegram.org/bot%s/sendMessage";
 
+    // replace with your personal bot chat id, the given one is fake
+    private static final Integer PERSONAL_CHAT_ID = 123456;
+
+    // replace with your channel chat id, the given one is fake
+    private static final Long CHANNEL_CHAT_ID = -12345678L;
+
+    // replace with your token, the given one is fake
+    private static final String TG_TOKEN = "1234:ABCDEFG";
+
     static {
-        // replace with your token, the given one is fake
-        String token = "123:abc";
+        String token = TG_TOKEN;
         urlString = String.format(urlString, token);
     }
 
@@ -95,7 +104,7 @@ public class MainService {
 
     public static void generateJSONArray() {
         HttpResponse response = HttpRequest.get(apiUrl)
-                .timeout(4000)
+                .timeout(30000)
                 .execute();
         String result = response.body();
         JSONObject jsonObject = JSONObject.parseObject(result);
@@ -105,6 +114,13 @@ public class MainService {
         }
         // 实时热搜 json array
         HOT_SEARCH_LIST = jsonObject.getJSONObject("data").getJSONArray("cards").getJSONObject(0).getJSONArray("card_group");
+        // 最原始的 for 循环往往效率最高
+        for (int i = 0; i < HOT_SEARCH_LIST.size(); i++) {
+            JSONObject item = HOT_SEARCH_LIST.getJSONObject(i);
+            String scheme = item.getString("scheme");
+            String newScheme = scheme.split("&")[0];
+            item.put("scheme", YourlsUtil.getYourlsUrl(newScheme));
+        }
     }
 
     @Scheduled(cron = "0 0 8,12,19 * * ?")
@@ -122,7 +138,7 @@ public class MainService {
             if (num > 0) {
                 String pushContent = buildTelegramNjPushContent(NJ_HOT_SEARCH_LIST);
                 Map<String, Object> map = new HashMap<>();
-                map.put("chat_id", 123456);
+                map.put("chat_id", PERSONAL_CHAT_ID);
                 map.put("text", pushContent);
                 sendPostReq(buildMap(map));
             }
@@ -134,7 +150,7 @@ public class MainService {
 
     public static void generateNjJSONArray() {
         HttpResponse response = HttpRequest.get(njApiUrl)
-                .timeout(20000)
+                .timeout(30000)
                 .execute();
         String result = response.body();
         JSONObject jsonObject = JSONObject.parseObject(result);
@@ -144,6 +160,14 @@ public class MainService {
         }
         // 南京同城本地热搜 json array
         NJ_HOT_SEARCH_LIST = jsonObject.getJSONObject("data").getJSONArray("cards").getJSONObject(1).getJSONArray("card_group");
+
+        // 最原始的 for 循环往往效率最高
+        for (int i = 0; i < NJ_HOT_SEARCH_LIST.size(); i++) {
+            JSONObject item = NJ_HOT_SEARCH_LIST.getJSONObject(i);
+            String scheme = item.getString("scheme");
+            String newScheme = scheme.split("&")[0];
+            item.put("scheme", YourlsUtil.getYourlsUrl(newScheme));
+        }
     }
 
     /**
@@ -168,8 +192,7 @@ public class MainService {
             if (num > 0) {
                 String pushContent = buildTelegramPushContent(HOT_SEARCH_LIST);
                 Map<String, Object> map = new HashMap<>();
-                // replace with your chatId, the given one is fake
-                map.put("chat_id", 123456);
+                map.put("chat_id", CHANNEL_CHAT_ID);
                 map.put("text", pushContent);
                 Map<String, Object> resultMap = buildMap(map);
                 sendPostReq(resultMap);
@@ -279,11 +302,12 @@ public class MainService {
                     sb.append(NumbersDict.getSpecificEmoji(single));
                 }
             }
-            sb.append(" ")
+            sb.append(" [")
                     .append(item.getString("desc"))
-                    .append(" ｜ `")
+                    .append("](")
+                    .append(item.getString("scheme"))
+                    .append(") | ")
                     .append(item.getString("desc_extr"))
-                    .append("`")
                     .append("\r\n");
         }
         return sb.toString();
@@ -324,11 +348,12 @@ public class MainService {
                     sb.append(NumbersDict.getSpecificEmoji(single));
                 }
             }
-            sb.append(" ")
+            sb.append(" [")
                     .append(item.getString("title_sub"))
-                    .append(" ｜ `")
+                    .append("](")
+                    .append(item.getString("scheme"))
+                    .append(") | ")
                     .append(item.getString("desc"))
-                    .append("`")
                     .append("\r\n");
         }
         return sb.toString();
@@ -337,7 +362,7 @@ public class MainService {
     private static Boolean sendPostReq(Map map) {
         String response = HttpRequest.post(urlString)
                 .form(map)
-                .timeout(30000) // 设置请求 30s 超时
+                .timeout(60000) // 设置请求 60s 超时
                 .execute()
                 .body();
         JSONObject responseJSON = JSONObject.parseObject(response);
